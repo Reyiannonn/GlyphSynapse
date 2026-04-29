@@ -1,0 +1,38 @@
+package com.glyphsynapse.app.di
+
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
+import com.glyphsynapse.app.data.datastore.UserPreferencesRepository
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import javax.inject.Singleton
+
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "glyph_synapse_prefs")
+
+@Module
+@InstallIn(SingletonComponent::class)
+object AppModule {
+
+    @Provides
+    @Singleton
+    fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+        context.dataStore
+
+    @Provides
+    @Singleton
+    fun provideUserPreferencesRepository(dataStore: DataStore<Preferences>): UserPreferencesRepository =
+        UserPreferencesRepository(dataStore)
+
+    @Provides
+    @Singleton
+    fun provideApplicationScope(): CoroutineScope = CoroutineScope(SupervisorJob())
+
+    // GlyphManagerWrapper and AnimationPlayer use @Inject constructors — Hilt binds them automatically
+}

@@ -1,0 +1,9 @@
+-keep class androidx.core.app.CoreComponentFactory { <init>(); }
+-keep class androidx.profileinstaller.ProfileInstallReceiver { <init>(); }
+-keep class androidx.startup.InitializationProvider { <init>(); }
+-keep class com.glyphsynapse.app.GlyphSynapseApp { <init>(); }
+-keep class com.glyphsynapse.app.MainActivity { <init>(); }
+-keep class com.glyphsynapse.app.service.BootReceiver { <init>(); }
+-keep class com.glyphsynapse.app.service.GlyphAnimationService { <init>(); }
+-keep class com.glyphsynapse.app.service.GlyphNotificationListenerService { <init>(); }
+-keep class com.glyphsynapse.app.service.GlyphTileService { <init>(); }
