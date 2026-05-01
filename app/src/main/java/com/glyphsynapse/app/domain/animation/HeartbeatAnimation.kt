@@ -30,10 +30,8 @@ object HeartbeatAnimation : AnimationDefinition {
         val cy = (h - 1) / 2f
         val maxDist = sqrt(cx * cx + cy * cy)
 
-        // Music makes the heart beat faster (shorter cycle)
-        val cycleReduction = (audioEnergy * 800).toLong()
-        val currentCycle = CYCLE_MS - cycleReduction
-        val t = elapsedMs % currentCycle
+        // Phase is based on elapsedMs which is already speed-integrated.
+        val t = elapsedMs % CYCLE_MS
         
         return IntArray(device.matrixSize) { i ->
             val x = i % w
@@ -43,13 +41,13 @@ object HeartbeatAnimation : AnimationDefinition {
             val dist = sqrt(dx * dx + dy * dy)
             val normDist = dist / maxDist
 
-            // Bass makes the heartbeat much stronger
+            // Bass makes the heartbeat pulse much stronger
             val strength = 1.0f + audioBass * 1.5f
             
             val lub = pulse(t - LUB_START, normDist) * strength
             val dub = pulse(t - DUB_START, normDist) * 0.7f * strength
 
-            pixel(maxOf(lub, dub), brightness)
+            pixel(maxOf(lub, dub), brightness + audioEnergy * 0.1f)
         }
     }
 

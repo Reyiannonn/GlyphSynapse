@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -129,20 +130,29 @@ fun NothingSlider(
 /** Subtle dot-matrix background pattern for that OEM feel. */
 @Composable
 fun DotMatrixBackground(modifier: Modifier = Modifier) {
-    Canvas(modifier = modifier.fillMaxSize()) {
-        val dotSize = 1.dp.toPx()
-        val spacing = 16.dp.toPx()
-        
-        for (x in 0..size.width.toInt() step spacing.toInt()) {
-            for (y in 0..size.height.toInt() step spacing.toInt()) {
-                drawCircle(
-                    color = Color.White.copy(alpha = 0.05f),
-                    radius = dotSize / 2,
-                    center = Offset(x.toFloat(), y.toFloat())
-                )
+    Spacer(
+        modifier = modifier
+            .fillMaxSize()
+            .drawWithCache {
+                onDrawBehind {
+                    val dotSize = 1.dp.toPx()
+                    val spacing = 16.dp.toPx()
+                    
+                    val xCount = (size.width / spacing).toInt()
+                    val yCount = (size.height / spacing).toInt()
+                    
+                    for (x in 0..xCount) {
+                        for (y in 0..yCount) {
+                            drawCircle(
+                                color = Color.White.copy(alpha = 0.05f),
+                                radius = dotSize / 2,
+                                center = Offset(x * spacing, y * spacing)
+                            )
+                        }
+                    }
+                }
             }
-        }
-    }
+    )
 }
 
 /** A single settings row with a label on the left and a control on the right. */

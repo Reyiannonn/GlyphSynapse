@@ -54,35 +54,37 @@ class AudioAwareness @Inject constructor(
                         }
                         val rms = sqrt(sum / waveform.size)
                         val rawEnergy = (rms / 32.0).toFloat().coerceIn(0f, 1f)
-                        _energy.value = _energy.value + 0.4f * (rawEnergy - _energy.value)
-                        _isActive.value = _energy.value > 0.01f
+                        // Smoother lerp for overall energy
+                        _energy.value = _energy.value + 0.15f * (rawEnergy - _energy.value)
+                        _isActive.value = _energy.value > 0.005f
                     }
 
                     override fun onFftDataCapture(v: Visualizer?, fft: ByteArray?, samplingRate: Int) {
                         if (fft == null) return
                         
-                        // Extract Bass (low freq), Mid (vocals/instruments)
                         var bassSum = 0f
                         var midSum = 0f
                         
-                        // FFT data format: [real0, imag0, real1, imag1, ...]
-                        // Low bins are bass, mid bins are vocal range
-                        for (i in 2..10 step 2) { // Bass 
+                        // Expanded FFT bins for better sensitivity
+                        // Low bins (0-150Hz approx)
+                        for (i in 2..14 step 2) { 
                             val real = fft[i].toFloat()
                             val imag = fft[i+1].toFloat()
                             bassSum += sqrt(real * real + imag * imag)
                         }
-                        for (i in 12..40 step 2) { // Mids
+                        // Mid bins (250Hz - 2kHz approx)
+                        for (i in 16..120 step 2) { 
                             val real = fft[i].toFloat()
                             val imag = fft[i+1].toFloat()
                             midSum += sqrt(real * real + imag * imag)
                         }
 
-                        val rawBass = (bassSum / 120f).coerceIn(0f, 1f)
-                        val rawMid = (midSum / 250f).coerceIn(0f, 1f)
+                        val rawBass = (bassSum / 180f).coerceIn(0f, 1f)
+                        val rawMid = (midSum / 400f).coerceIn(0f, 1f)
 
-                        _bass.value = _bass.value + 0.5f * (rawBass - _bass.value)
-                        _mid.value = _mid.value + 0.3f * (rawMid - _mid.value)
+                        // Slower, more organic smoothing
+                        _bass.value = _bass.value + 0.25f * (rawBass - _bass.value)
+                        _mid.value = _mid.value + 0.15f * (rawMid - _mid.value)
                     }
                 }, Visualizer.getMaxCaptureRate() / 2, true, true)
                 

@@ -47,7 +47,8 @@ fun GlyphPreview(
         if (externalPixels != null) return@LaunchedEffect
         var lastTick = System.currentTimeMillis()
         while (isActive) {
-            delay(33)
+            // Lower FPS for preview to save CPU
+            delay(40)
             val now = System.currentTimeMillis()
             elapsed += ((now - lastTick) * speedMultiplier).toLong()
             lastTick = now

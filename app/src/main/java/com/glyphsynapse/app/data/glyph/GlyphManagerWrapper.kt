@@ -2,7 +2,6 @@ package com.glyphsynapse.app.data.glyph
 
 import android.content.ComponentName
 import android.content.Context
-import com.nothing.ketchum.GlyphMatrixFrame
 import com.nothing.ketchum.GlyphMatrixManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,11 +12,11 @@ import javax.inject.Singleton
 
 @Singleton
 class GlyphManagerWrapper @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context,
 ) {
     private var manager: GlyphMatrixManager? = null
 
-    private val _isConnected = MutableStateFlow(false)
+    private val _isConnected = MutableStateFlow(value = false)
     val isConnected: StateFlow<Boolean> = _isConnected
 
     // Diagnostic steps — visible in the debug panel
@@ -65,7 +64,7 @@ class GlyphManagerWrapper @Inject constructor(
     }
 
     fun init() {
-        if (_initCalled.value && manager != null) {
+        if ((_initCalled.value && manager != null)) {
             Timber.d("GlyphManagerWrapper.init() already called, skipping")
             return
         }
@@ -109,13 +108,6 @@ class GlyphManagerWrapper @Inject constructor(
         }.onFailure { Timber.e(it, "sendFrame failed") }
     }
 
-    fun sendFrame(frame: GlyphMatrixFrame) {
-        if (!_isConnected.value) return
-        runCatching {
-            manager?.setAppMatrixFrame(frame)
-        }.onFailure { Timber.e(it, "sendFrame(GlyphMatrixFrame) failed") }
-    }
-
     fun clear() {
         if (!_isConnected.value) return
         runCatching { manager?.closeAppMatrix() }
@@ -124,7 +116,8 @@ class GlyphManagerWrapper @Inject constructor(
 
     fun setTimeoutEnabled(enabled: Boolean) {
         if (!_isConnected.value) return
-        runCatching { manager?.setGlyphMatrixTimeout(enabled) }
+        // Force timeout to false for 24/7 operation
+        runCatching { manager?.setGlyphMatrixTimeout(false) }
             .onFailure { Timber.e(it, "setTimeoutEnabled failed") }
     }
 

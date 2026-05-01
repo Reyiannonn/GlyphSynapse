@@ -1,5 +1,9 @@
 package com.glyphsynapse.app.ui.screens
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,7 +21,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.glyphsynapse.app.ui.components.DotMatrixBackground
 import com.glyphsynapse.app.ui.components.GlyphPreview
@@ -32,10 +38,19 @@ import com.glyphsynapse.app.ui.viewmodel.HomeViewModel
 
 @Composable
 fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
+    val context = LocalContext.current
     // Only recomposes when main settings change (rarely)
     val state by viewModel.uiState.collectAsState()
     // Recomposes only the preview (30fps)
     val pixelFrame by viewModel.pixelFrame.collectAsState()
+
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.toggleService(true)
+        }
+    }
 
     if (!state.isCompatibleDevice) {
         IncompatibleDeviceScreen()
@@ -110,7 +125,21 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
                 control = {
                     NothingSwitch(
                         checked = state.serviceEnabled,
-                        onCheckedChange = viewModel::toggleService
+                        onCheckedChange = { enabled ->
+                            if (enabled) {
+                                val hasPermission = ContextCompat.checkSelfPermission(
+                                    context, Manifest.permission.RECORD_AUDIO
+                                ) == PackageManager.PERMISSION_GRANTED
+                                
+                                if (hasPermission) {
+                                    viewModel.toggleService(true)
+                                } else {
+                                    launcher.launch(Manifest.permission.RECORD_AUDIO)
+                                }
+                            } else {
+                                viewModel.toggleService(false)
+                            }
+                        }
                     )
                 }
             )

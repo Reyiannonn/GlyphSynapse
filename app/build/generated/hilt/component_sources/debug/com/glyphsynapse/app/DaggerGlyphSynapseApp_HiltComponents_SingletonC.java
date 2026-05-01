@@ -420,19 +420,16 @@ public final class DaggerGlyphSynapseApp_HiltComponents_SingletonC {
     private static final class LazyClassKeyProvider {
       static String com_glyphsynapse_app_ui_viewmodel_AnimationsViewModel = "com.glyphsynapse.app.ui.viewmodel.AnimationsViewModel";
 
-      static String com_glyphsynapse_app_ui_viewmodel_PresetsViewModel = "com.glyphsynapse.app.ui.viewmodel.PresetsViewModel";
-
       static String com_glyphsynapse_app_ui_viewmodel_HomeViewModel = "com.glyphsynapse.app.ui.viewmodel.HomeViewModel";
 
       static String com_glyphsynapse_app_ui_viewmodel_SettingsViewModel = "com.glyphsynapse.app.ui.viewmodel.SettingsViewModel";
 
       static String com_glyphsynapse_app_ui_viewmodel_AdvancedViewModel = "com.glyphsynapse.app.ui.viewmodel.AdvancedViewModel";
 
-      @KeepFieldType
-      AnimationsViewModel com_glyphsynapse_app_ui_viewmodel_AnimationsViewModel2;
+      static String com_glyphsynapse_app_ui_viewmodel_PresetsViewModel = "com.glyphsynapse.app.ui.viewmodel.PresetsViewModel";
 
       @KeepFieldType
-      PresetsViewModel com_glyphsynapse_app_ui_viewmodel_PresetsViewModel2;
+      AnimationsViewModel com_glyphsynapse_app_ui_viewmodel_AnimationsViewModel2;
 
       @KeepFieldType
       HomeViewModel com_glyphsynapse_app_ui_viewmodel_HomeViewModel2;
@@ -442,6 +439,9 @@ public final class DaggerGlyphSynapseApp_HiltComponents_SingletonC {
 
       @KeepFieldType
       AdvancedViewModel com_glyphsynapse_app_ui_viewmodel_AdvancedViewModel2;
+
+      @KeepFieldType
+      PresetsViewModel com_glyphsynapse_app_ui_viewmodel_PresetsViewModel2;
     }
   }
 
@@ -510,30 +510,30 @@ public final class DaggerGlyphSynapseApp_HiltComponents_SingletonC {
 
     @IdentifierNameString
     private static final class LazyClassKeyProvider {
-      static String com_glyphsynapse_app_ui_viewmodel_HomeViewModel = "com.glyphsynapse.app.ui.viewmodel.HomeViewModel";
+      static String com_glyphsynapse_app_ui_viewmodel_SettingsViewModel = "com.glyphsynapse.app.ui.viewmodel.SettingsViewModel";
 
       static String com_glyphsynapse_app_ui_viewmodel_AnimationsViewModel = "com.glyphsynapse.app.ui.viewmodel.AnimationsViewModel";
 
-      static String com_glyphsynapse_app_ui_viewmodel_AdvancedViewModel = "com.glyphsynapse.app.ui.viewmodel.AdvancedViewModel";
-
-      static String com_glyphsynapse_app_ui_viewmodel_SettingsViewModel = "com.glyphsynapse.app.ui.viewmodel.SettingsViewModel";
-
       static String com_glyphsynapse_app_ui_viewmodel_PresetsViewModel = "com.glyphsynapse.app.ui.viewmodel.PresetsViewModel";
 
-      @KeepFieldType
-      HomeViewModel com_glyphsynapse_app_ui_viewmodel_HomeViewModel2;
+      static String com_glyphsynapse_app_ui_viewmodel_AdvancedViewModel = "com.glyphsynapse.app.ui.viewmodel.AdvancedViewModel";
 
-      @KeepFieldType
-      AnimationsViewModel com_glyphsynapse_app_ui_viewmodel_AnimationsViewModel2;
-
-      @KeepFieldType
-      AdvancedViewModel com_glyphsynapse_app_ui_viewmodel_AdvancedViewModel2;
+      static String com_glyphsynapse_app_ui_viewmodel_HomeViewModel = "com.glyphsynapse.app.ui.viewmodel.HomeViewModel";
 
       @KeepFieldType
       SettingsViewModel com_glyphsynapse_app_ui_viewmodel_SettingsViewModel2;
 
       @KeepFieldType
+      AnimationsViewModel com_glyphsynapse_app_ui_viewmodel_AnimationsViewModel2;
+
+      @KeepFieldType
       PresetsViewModel com_glyphsynapse_app_ui_viewmodel_PresetsViewModel2;
+
+      @KeepFieldType
+      AdvancedViewModel com_glyphsynapse_app_ui_viewmodel_AdvancedViewModel2;
+
+      @KeepFieldType
+      HomeViewModel com_glyphsynapse_app_ui_viewmodel_HomeViewModel2;
     }
 
     private static final class SwitchingProvider<T> implements Provider<T> {

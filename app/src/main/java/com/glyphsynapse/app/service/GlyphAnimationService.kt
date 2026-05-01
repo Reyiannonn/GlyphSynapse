@@ -1,5 +1,6 @@
 package com.glyphsynapse.app.service
 
+import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -8,8 +9,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo
 import android.os.BatteryManager
 import android.os.PowerManager
+import androidx.core.content.ContextCompat
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
@@ -61,17 +65,40 @@ class GlyphAnimationService : LifecycleService() {
 
     override fun onCreate() {
         super.onCreate()
-        startForeground(NOTIFICATION_ID, buildNotification())
         
-        audioAwareness.start()
+        val hasMicPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+        
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            var fgsType = ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+            if (hasMicPermission) {
+                fgsType = fgsType or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+            }
+            
+            startForeground(
+                NOTIFICATION_ID, 
+                buildNotification(),
+                fgsType
+            )
+        } else {
+            startForeground(NOTIFICATION_ID, buildNotification())
+        }
+        
+        if (hasMicPermission) {
+            audioAwareness.start()
+        } else {
+            Timber.w("Microphone permission missing — audio visualizer disabled")
+        }
 
         glyphManager.onConnected = { lifecycleScope.launch { refreshAnimation(forceReset = true) } }
         glyphManager.init()
 
-        registerReceiver(screenReceiver, IntentFilter().apply {
-            addAction(Intent.ACTION_SCREEN_OFF)
-            addAction(Intent.ACTION_SCREEN_ON)
-        })
+        registerReceiver(
+            screenReceiver,
+            IntentFilter().apply {
+                addAction(Intent.ACTION_SCREEN_OFF)
+                addAction(Intent.ACTION_SCREEN_ON)
+            },
+        )
         registerReceiver(chargingReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
 
         Timber.d("GlyphAnimationService started")
@@ -82,7 +109,7 @@ class GlyphAnimationService : LifecycleService() {
         val action = intent?.action
         Timber.d("GlyphAnimationService onStartCommand action=$action")
 
-        if ((action == ACTION_UPDATE_ANIMATION || action == ACTION_GLYPH_TOY) && glyphManager.isConnected.value) {
+        if (((action == ACTION_UPDATE_ANIMATION || action == ACTION_GLYPH_TOY)) && glyphManager.isConnected.value) {
             lifecycleScope.launch { refreshAnimation(forceReset = false) }
         }
         return START_STICKY
@@ -122,7 +149,8 @@ class GlyphAnimationService : LifecycleService() {
         val animation = AnimationRegistry.find(resolvedName, this)
         animationPlayer.play(animation, speed, brightness, glyphManager.device, forceReset)
 
-        runCatching { glyphManager.setTimeoutEnabled(false) }
+        // Always ensure timeout is disabled
+        glyphManager.setTimeoutEnabled(false)
     }
 
     private fun isDeviceCharging(): Boolean {
@@ -138,7 +166,7 @@ class GlyphAnimationService : LifecycleService() {
         wakeLock = pm.newWakeLock(
             PowerManager.PARTIAL_WAKE_LOCK,
             "GlyphSynapse::AnimationWakeLock"
-        ).apply { acquire() }
+        ).apply { acquire() } // 24/7 operation, no timeout
     }
 
     private fun releaseWakeLock() {

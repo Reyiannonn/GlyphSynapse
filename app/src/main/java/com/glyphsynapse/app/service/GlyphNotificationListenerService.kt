@@ -46,7 +46,7 @@ class GlyphNotificationListenerService : NotificationListenerService() {
         val fullOn = IntArray(device.matrixSize) { 255 }
 
         repeat(pulses) { i ->
-            if (i % 2 == 0) {
+            if ((i % 2 == 0)) {
                 glyphManager.sendFrame(fullOn)
                 delay(onMs)
             } else {

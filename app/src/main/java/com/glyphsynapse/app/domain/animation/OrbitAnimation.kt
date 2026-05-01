@@ -29,9 +29,8 @@ object OrbitAnimation : AnimationDefinition {
         val cy = (h - 1) / 2f
         val r = minOf(cx, cy) * ORBIT_RADIUS_FRAC
 
-        // Music makes the orbit faster
-        val speedBoost = audioEnergy * 3.0
-        val headAngle = (elapsedMs % CYCLE_MS) / CYCLE_MS * TWO_PI + speedBoost
+        // Head position is purely based on elapsedMs for temporal stability.
+        val headAngle = (elapsedMs % CYCLE_MS) / CYCLE_MS * TWO_PI
 
         return IntArray(device.matrixSize) { i ->
             val x = i % w
@@ -45,13 +44,13 @@ object OrbitAnimation : AnimationDefinition {
             val angle = atan2(dy.toDouble(), dx.toDouble())
             val angularDist = (headAngle - angle + TWO_PI) % TWO_PI
             
-            // Tail stretches and brightens with music
+            // Tail stretches and brightens with music mids
             val tailDecay = 2.5 - (audioMid * 1.5)
             val angularFactor = kotlin.math.exp(-angularDist * tailDecay).toFloat()
-            val ringFactor = kotlin.math.exp(-ringDist * 1.5).toFloat()
+            val ringFactor = kotlin.math.exp(-ringDist * 1.8).toFloat()
             
             val lit = angularFactor * ringFactor
-            pixel(lit, brightness + audioEnergy * 0.2f)
+            pixel(lit, brightness + audioEnergy * 0.15f)
         }
     }
 }

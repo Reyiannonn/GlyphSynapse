@@ -20,7 +20,7 @@ import javax.inject.Singleton
 @Singleton
 class AnimationPlayer @Inject constructor(
     private val glyphManager: GlyphManagerWrapper,
-    private val audioAwareness: AudioAwareness
+    private val audioAwareness: AudioAwareness,
 ) {
     private var playerScope = CoroutineScope(Dispatchers.Default)
     private var animationJob: Job? = null
@@ -31,9 +31,6 @@ class AnimationPlayer @Inject constructor(
 
     private val _currentFrame = MutableStateFlow<PixelFrame?>(null)
     val currentFrame: StateFlow<PixelFrame?> = _currentFrame.asStateFlow()
-
-    private val _elapsedTime = MutableStateFlow(0L)
-    val elapsedTime: StateFlow<Long> = _elapsedTime.asStateFlow()
 
     private var currentAnimationName: String? = null
 
@@ -78,16 +75,14 @@ class AnimationPlayer @Inject constructor(
                 val effectiveSpeed = speedMultiplier * (1f + energy)
                 val elapsed = scheduler.awaitNextFrame(effectiveSpeed)
                 
-                _elapsedTime.value = elapsed
-                
                 val pixels = animation.tick(elapsed, brightness, device, energy, bass, mid)
                 
                 _currentFrame.value = PixelFrame(pixels)
                 
                 if (glyphManager.isConnected.value) {
                     glyphManager.sendFrame(pixels)
-                    if (elapsed % 5000 < 33) {
-                        glyphManager.setTimeoutEnabled(false)
+                    if ((elapsed % 5000) < 33) {
+                        glyphManager.setTimeoutEnabled(enabled = false)
                     }
                 }
             }

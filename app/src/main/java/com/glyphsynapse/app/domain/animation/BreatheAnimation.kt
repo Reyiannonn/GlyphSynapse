@@ -27,9 +27,6 @@ object BreatheAnimation : AnimationDefinition {
         
         val t = elapsedMs / 1000.0
         
-        // Music speeds up the resting heart rate
-        val audioSpeedBoost = audioEnergy * 2.0
-        
         // The "Soul" of the device drifts slightly over time
         val driftX = (sin(t * 0.13) * 2.0).toFloat()
         val driftY = (sin(t * 0.17) * 2.0).toFloat()
@@ -39,8 +36,10 @@ object BreatheAnimation : AnimationDefinition {
         val maxDist = sqrt(cx * cx + cy * cy)
 
         // Non-linear bio-rhythm
+        // Note: audioSpeedBoost is removed from phase to prevent chaotic jumps.
+        // The speed boost is already integrated into elapsedMs by the scheduler.
         val mainPhase = (elapsedMs % CYCLE_MS) / CYCLE_MS * TWO_PI
-        val bioPulse = sin(mainPhase + audioSpeedBoost) + 0.15 * sin(mainPhase * 2.3)
+        val bioPulse = sin(mainPhase) + 0.15 * sin(mainPhase * 2.3)
         val normalizedPulse = ((bioPulse + 1.15) / 2.3).toFloat()
         val easedPulse = normalizedPulse * normalizedPulse
 
@@ -59,6 +58,7 @@ object BreatheAnimation : AnimationDefinition {
             val falloff = 1f - (normDist * 0.7f)
             val lit = (localInt.toFloat() * easedPulse * falloff)
             
+            // Brightness reacts to audio energy for a "heartbeat" feel
             pixel(lit, brightness + audioEnergy * 0.2f)
         }
     }
