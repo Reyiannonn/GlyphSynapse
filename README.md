@@ -1,7 +1,7 @@
 # GlyphSynapse
 
-Always-On Display controller for Nothing Phone (2) and Nothing Phone (2a) Pro.
-Drive the Glyph Interface matrix with smooth, looping animations from a first-party-quality NothingOS app.
+Always-On Display controller for **Nothing Phone (3)** and **Nothing Phone (4a) Pro**.
+Drive the Glyph Interface matrix with smooth, organic, and audio-reactive animations from a first-party-quality NothingOS app.
 
 ---
 
@@ -9,22 +9,23 @@ Drive the Glyph Interface matrix with smooth, looping animations from a first-pa
 
 | Category | Feature |
 |---|---|
-| Animations | 8 built-in scenes: Breathe, Cascade, Orbit, Pulse Wave, Heartbeat, Matrix Rain, Charging Fill, Idle Drift |
-| Control | Speed multiplier 0.25×–4.0×, Brightness 0–100%, Stealth Mode (caps at 15%) |
-| AOD | Auto-starts animation on screen-off, stops on screen-on |
-| Smart | Charging Fill override when plugged in, notification-aware zone reactions |
-| Schedule | Time-window auto-activation (e.g. 22:00–07:00 nightstand mode) |
-| Per-Zone | Assign different animations to Ring, Strip, Battery zones independently |
-| Presets | Save, load, export/import via Android Share Sheet |
-| Quick Tile | Toggle GlyphSynapse from Quick Settings panel |
+| **Animations** | 8 premium scenes: **Vitality**, **Synapse**, **Presence**, **Cascade**, **Orbit**, **Heartbeat**, **Matrix Rain**, **Charging Fill** |
+| **Audio-Reactive** | Animations accelerate and react to music (Bass, Mid, Energy). "Submerged speaker" physics for liquid effects. |
+| **Stability** | Temporal integration ensures smooth motion during media playback—no phase jumps or chaotic teleporting. |
+| **Control** | Speed multiplier 0.25×–4.0×, Brightness 0–100%, Stealth Mode (caps at 15%) |
+| **24/7 Operation** | Optimized for Always-On usage with no hardware timeouts or service interruptions. |
+| **Smart** | Charging Fill override when plugged in, notification-aware reactions (Call/Message/Alarm). |
+| **Presets** | Save, load, and export/import animation configurations via Android Share Sheet. |
+| **Quick Tile** | Toggle GlyphSynapse service directly from the Quick Settings panel. |
 
 ---
 
 ## Requirements
 
-- **Nothing Phone (3)** (25×25 LED matrix) or **Nothing Phone (4a) Pro** (13×13 LED matrix)
-- NothingOS system version **20250801** or later
-- Android **14+** (API 34+)
+- **Nothing Phone (3)** (25×25 LED matrix) or **Nothing Phone (4a) Pro** (13×13 LED matrix).
+- NothingOS system version **20250801** or later.
+- Android **14+** (API 34/35).
+- **Microphone Permission**: Required for audio-reactive animation features.
 
 ---
 
@@ -52,7 +53,7 @@ Place the following in `app/src/main/res/font/`:
 
 ### 3. Add GlyphMatrix SDK AAR
 
-Download `glyph-matrix-sdk-2.0.aar` from [GlyphMatrix-Developer-Kit](https://github.com/Nothing-Developer-Programme/GlyphMatrix-Developer-Kit) and place it in `app/libs/`. See [SETUP.md](SETUP.md) for full instructions.
+Download `glyph-matrix-sdk-2.0.aar` from [GlyphMatrix-Developer-Kit](https://github.com/Nothing-Developer-Programme/GlyphMatrix-Developer-Kit) and place it in `app/libs/`.
 
 ### 4. Build
 
@@ -60,7 +61,7 @@ Download `glyph-matrix-sdk-2.0.aar` from [GlyphMatrix-Developer-Kit](https://git
 ./gradlew assembleDebug
 ```
 
-The APK is at `app/build/outputs/apk/debug/app-debug.apk`.
+The APK is located at `app/build/outputs/apk/debug/app-debug.apk`.
 
 ---
 
@@ -70,20 +71,19 @@ The APK is at `app/build/outputs/apk/debug/app-debug.apk`.
 GlyphSynapse
 ├── data/
 │   ├── datastore/      — UserPreferencesRepository (DataStore)
-│   └── glyph/          — GlyphManagerWrapper, GlyphMap, channel definitions
+│   └── glyph/          — GlyphManagerWrapper (SDK interface), GlyphMatrixDevice detection
 ├── domain/
-│   ├── animation/      — AnimationDefinition interface + 8 scene implementations
-│   ├── engine/         — AnimationPlayer, FrameScheduler (30fps coroutine loop)
-│   ├── model/          — Preset, ScheduleWindow, ZoneAssignment
-│   └── usecase/        — Preset CRUD operations
+│   ├── animation/      — AnimationDefinition interface + 8 premium scene implementations
+│   ├── engine/         — AnimationPlayer, FrameScheduler (Stable speed integration)
+│   └── model/          — Preset, ScheduleWindow, PixelFrame
 ├── service/
-│   ├── GlyphAnimationService        — Foreground service, screen-off trigger
+│   ├── GlyphAnimationService        — Foreground service (Microphone + Special Use)
 │   ├── GlyphNotificationListenerService — Call/message/alarm reactions
 │   ├── GlyphTileService             — Quick Settings tile
 │   └── BootReceiver                 — Auto-start after reboot
 └── ui/
-    ├── theme/          — NothingOS colours, typography, dot-matrix renderer
-    ├── components/     — GlyphPreview, AnimationCard, NothingSlider, NothingSwitch
+    ├── theme/          — NothingOS colours, typography, DotMatrixText renderer
+    ├── components/     — GlyphPreview, AnimationCard, NothingControls (Optimized rendering)
     ├── screens/        — Home, Animations, Settings, Presets, Advanced
     └── viewmodel/      — StateFlow-based ViewModels
 ```
@@ -96,7 +96,7 @@ GlyphSynapse
 ./gradlew test
 ```
 
-Unit tests cover `AnimationPlayer`, `FrameScheduler`, and all 8 `AnimationDefinition.tick()` implementations.
+Unit tests cover the `AnimationPlayer` logic, `FrameScheduler` temporal stability, and `AnimationDefinition.tick()` implementations.
 
 ---
 
