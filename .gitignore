@@ -1,0 +1,29 @@
+# Android Studio / IntelliJ
+.idea/
+*.iml
+.gradle/
+.kotlin/
+build/
+app/build/
+captures/
+.externalNativeBuild/
+.cxx/
+local.properties
+
+# Gradle
+.gradle
+/build/
+
+# Kotlin
+/bin/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Glyph Matrix SDK (usually ignored if not intended to be redistributed)
+# app/libs/*.aar
+
+# Claude / AI tools
+.claude/
+.artifacts/
