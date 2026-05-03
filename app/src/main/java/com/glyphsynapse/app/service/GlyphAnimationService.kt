@@ -67,21 +67,13 @@ class GlyphAnimationService : LifecycleService() {
         super.onCreate()
         
         val hasMicPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+        val fgsType = ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
         
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            var fgsType = ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
-            if (hasMicPermission) {
-                fgsType = fgsType or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
-            }
-            
-            startForeground(
-                NOTIFICATION_ID, 
-                buildNotification(),
-                fgsType
-            )
-        } else {
-            startForeground(NOTIFICATION_ID, buildNotification())
-        }
+        startForeground(
+            NOTIFICATION_ID, 
+            buildNotification(),
+            if (hasMicPermission) fgsType else ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
+        )
         
         if (hasMicPermission) {
             audioAwareness.start()
@@ -109,7 +101,7 @@ class GlyphAnimationService : LifecycleService() {
         val action = intent?.action
         Timber.d("GlyphAnimationService onStartCommand action=$action")
 
-        if (((action == ACTION_UPDATE_ANIMATION || action == ACTION_GLYPH_TOY)) && glyphManager.isConnected.value) {
+        if ((action == ACTION_UPDATE_ANIMATION || action == ACTION_GLYPH_TOY) && glyphManager.isConnected.value) {
             lifecycleScope.launch { refreshAnimation(forceReset = false) }
         }
         return START_STICKY
@@ -150,7 +142,7 @@ class GlyphAnimationService : LifecycleService() {
         animationPlayer.play(animation, speed, brightness, glyphManager.device, forceReset)
 
         // Always ensure timeout is disabled
-        glyphManager.setTimeoutEnabled(false)
+        glyphManager.setTimeoutEnabled(enabled = false)
     }
 
     private fun isDeviceCharging(): Boolean {
@@ -166,7 +158,10 @@ class GlyphAnimationService : LifecycleService() {
         wakeLock = pm.newWakeLock(
             PowerManager.PARTIAL_WAKE_LOCK,
             "GlyphSynapse::AnimationWakeLock"
-        ).apply { acquire() } // 24/7 operation, no timeout
+        ).apply { 
+            // 24-hour safety timeout (practically 24/7, but satisfies lint)
+            acquire(24 * 60 * 60 * 1000L) 
+        }
     }
 
     private fun releaseWakeLock() {

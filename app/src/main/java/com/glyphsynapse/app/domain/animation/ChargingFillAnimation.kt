@@ -22,7 +22,7 @@ class ChargingFillAnimation(private val context: Context) : AnimationDefinition 
             val intent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
             val level = intent?.getIntExtra(BatteryManager.EXTRA_LEVEL, 50) ?: 50
             val scale = intent?.getIntExtra(BatteryManager.EXTRA_SCALE, 100) ?: 100
-            return if (scale > 0) (level * 100 / scale) else 50
+            return if (scale > 0) ((level * 100) / scale) else 50
         }
 
     override fun tick(
@@ -31,7 +31,7 @@ class ChargingFillAnimation(private val context: Context) : AnimationDefinition 
         device: GlyphMatrixDevice,
         audioEnergy: Float,
         audioBass: Float,
-        audioMid: Float
+        audioMid: Float,
     ): IntArray {
         val w = device.matrixWidth
         val h = device.matrixHeight
@@ -40,7 +40,7 @@ class ChargingFillAnimation(private val context: Context) : AnimationDefinition 
 
         // Handle full battery with a slow "breathing" glow
         if (pct >= 99) {
-            val phase = (elapsedMs % 4000.0) / 4000.0 * TWO_PI
+            val phase = ((elapsedMs % 4000.0) / 4000.0) * TWO_PI
             val intensity = 0.5f + 0.5f * sin(phase).toFloat()
             val v = pixel(intensity, brightness + audioEnergy * 0.2f)
             return IntArray(device.matrixSize) { v }

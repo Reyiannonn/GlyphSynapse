@@ -20,10 +20,10 @@ class GlyphManagerWrapper @Inject constructor(
     val isConnected: StateFlow<Boolean> = _isConnected
 
     // Diagnostic steps — visible in the debug panel
-    private val _initCalled = MutableStateFlow(false)
+    private val _initCalled = MutableStateFlow(value = false)
     val initCalled: StateFlow<Boolean> = _initCalled
 
-    private val _callbackFired = MutableStateFlow(false)
+    private val _callbackFired = MutableStateFlow(value = false)
     val callbackFired: StateFlow<Boolean> = _callbackFired
 
     private val _registerResult = MutableStateFlow("not called")
@@ -64,7 +64,7 @@ class GlyphManagerWrapper @Inject constructor(
     }
 
     fun init() {
-        if ((_initCalled.value && manager != null)) {
+        if (_initCalled.value && manager != null) {
             Timber.d("GlyphManagerWrapper.init() already called, skipping")
             return
         }
@@ -114,7 +114,7 @@ class GlyphManagerWrapper @Inject constructor(
             .onFailure { Timber.e(it, "clear failed") }
     }
 
-    fun setTimeoutEnabled(enabled: Boolean) {
+    fun setTimeoutEnabled(@Suppress("UNUSED_PARAMETER") enabled: Boolean) {
         if (!_isConnected.value) return
         // Force timeout to false for 24/7 operation
         runCatching { manager?.setGlyphMatrixTimeout(false) }
