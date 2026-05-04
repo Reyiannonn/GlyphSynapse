@@ -53,14 +53,17 @@
             android:foregroundServiceType="specialUse|microphone"
             android:permission="com.nothing.ketchum.permission.ENABLE">
             <intent-filter>
-                <action android:name="com.nothing.glyph.toy.ACTION_GLYPH_TOY" />
+                <action android:name="com.nothing.glyph.TOY" />
             </intent-filter>
 
             <meta-data
                 android:name="com.nothing.glyph.toy.name"
-                android:value="@string/toy_name" />
+                android:resource="@string/toy_name" />
             <meta-data
-                android:name="com.nothing.glyph.toy.preview"
+                android:name="com.nothing.glyph.toy.summary"
+                android:resource="@string/toy_summary" />
+            <meta-data
+                android:name="com.nothing.glyph.toy.image"
                 android:resource="@drawable/ic_tile_glyph" />
             <meta-data
                 android:name="com.nothing.glyph.toy.aod_support"

@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,6 +66,15 @@ class AnimationPlayer @Inject constructor(
         animationJob = playerScope.launch {
             Timber.d("AnimationPlayer: running ${animation.name}")
             while (isActive) {
+                // If we don't have focus, wait and clear matrix
+                if (!glyphManager.hasFocus.value) {
+                    glyphManager.clear()
+                    while (!glyphManager.hasFocus.value && isActive) {
+                        delay(500)
+                    }
+                    if (isActive) scheduler.reset() // Prevent jump after resume
+                }
+
                 // Fetch current audio data
                 val energy = audioAwareness.energy.value
                 val bass = audioAwareness.bass.value

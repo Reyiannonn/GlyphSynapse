@@ -20,41 +20,34 @@ class GlyphNotificationListenerService : NotificationListenerService() {
     @Inject lateinit var glyphManager: GlyphManagerWrapper
 
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    private var reactionJob: Job? = null
+    private var yieldJob: Job? = null
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         if (!glyphManager.isConnected.value) return
-        val category = sbn.notification.category ?: return
-        Timber.d("Notification category: $category from ${sbn.packageName}")
-
-        reactionJob?.cancel()
-        reactionJob = scope.launch {
-            when (category) {
-                android.app.Notification.CATEGORY_CALL    -> reactPulse(pulses = 8, onMs = 150, offMs = 150)
-                android.app.Notification.CATEGORY_MESSAGE -> reactPulse(pulses = 2, onMs = 300, offMs = 200)
-                android.app.Notification.CATEGORY_ALARM   -> reactPulse(pulses = 6, onMs = 200, offMs = 300)
-            }
-        }
-    }
-
-    /**
-     * Flash the entire matrix on/off [pulses] times.
-     * A full-white frame alternates with a clear frame.
-     */
-    private suspend fun reactPulse(pulses: Int, onMs: Long, offMs: Long) {
-        val device = glyphManager.device
-        val fullOn = IntArray(device.matrixSize) { 255 }
-
-        repeat(pulses) { i ->
-            if ((i % 2 == 0)) {
-                glyphManager.sendFrame(fullOn)
-                delay(onMs)
-            } else {
+        
+        // Check if it's a notification we should yield for
+        val category = sbn.notification.category
+        val isUrgent = category == android.app.Notification.CATEGORY_CALL || 
+            category == android.app.Notification.CATEGORY_MESSAGE ||
+            category == android.app.Notification.CATEGORY_ALARM
+            
+        if (isUrgent) {
+            Timber.d("GlyphNotificationListener: Yielding matrix for notification from ${sbn.packageName}")
+            
+            yieldJob?.cancel()
+            yieldJob = scope.launch {
+                // Stop our animations and clear matrix so OS can take over
+                glyphManager.setFocus(false)
                 glyphManager.clear()
-                delay(offMs)
+                
+                // Wait for the OS notification animation to finish (typical duration 5-8 seconds)
+                delay(6000)
+                
+                // Resume our animations
+                Timber.d("GlyphNotificationListener: Resuming matrix control")
+                glyphManager.setFocus(true)
             }
         }
-        glyphManager.clear()
     }
 
     override fun onListenerDisconnected() {

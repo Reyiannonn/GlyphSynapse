@@ -12,6 +12,7 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.BatteryManager
+import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.content.ContextCompat
 import androidx.core.app.NotificationCompat
@@ -75,11 +76,7 @@ class GlyphAnimationService : LifecycleService() {
             if (hasMicPermission) fgsType else ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
         )
         
-        if (hasMicPermission) {
-            audioAwareness.start()
-        } else {
-            Timber.w("Microphone permission missing — audio visualizer disabled")
-        }
+        audioAwareness.start()
 
         glyphManager.onConnected = { lifecycleScope.launch { refreshAnimation(forceReset = true) } }
         glyphManager.init()
@@ -94,6 +91,21 @@ class GlyphAnimationService : LifecycleService() {
         registerReceiver(chargingReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
 
         Timber.d("GlyphAnimationService started")
+    }
+
+    override fun onBind(intent: Intent): IBinder? {
+        val binder = super.onBind(intent)
+        Timber.d("GlyphAnimationService: onBind (System selected this toy)")
+        glyphManager.setFocus(true)
+        lifecycleScope.launch { refreshAnimation(forceReset = false) }
+        return binder
+    }
+
+    override fun onUnbind(intent: Intent?): Boolean {
+        Timber.d("GlyphAnimationService: onUnbind (System deselected this toy)")
+        glyphManager.setFocus(false)
+        glyphManager.clear()
+        return super.onUnbind(intent)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

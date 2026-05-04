@@ -19,6 +19,10 @@ class GlyphManagerWrapper @Inject constructor(
     private val _isConnected = MutableStateFlow(value = false)
     val isConnected: StateFlow<Boolean> = _isConnected
 
+    // hasFocus is managed by GlyphAnimationService based on onBind/onUnbind
+    private val _hasFocus = MutableStateFlow(value = true)
+    val hasFocus: StateFlow<Boolean> = _hasFocus
+
     // Diagnostic steps — visible in the debug panel
     private val _initCalled = MutableStateFlow(value = false)
     val initCalled: StateFlow<Boolean> = _initCalled
@@ -49,7 +53,10 @@ class GlyphManagerWrapper @Inject constructor(
                 _registerResult.value = authorized.toString()
                 Timber.d("GlyphMatrix register(${device.deviceCode}) -> authorized=$authorized")
                 _isConnected.value = authorized
-                if (authorized) onConnected?.invoke()
+                if (authorized) {
+                    _hasFocus.value = true
+                    onConnected?.invoke()
+                }
             }.onFailure {
                 _registerResult.value = "error: ${it.javaClass.simpleName}"
                 Timber.e(it, "GlyphMatrix register failed")
@@ -60,7 +67,13 @@ class GlyphManagerWrapper @Inject constructor(
         override fun onServiceDisconnected(componentName: ComponentName?) {
             Timber.d("GlyphMatrix service disconnected")
             _isConnected.value = false
+            _hasFocus.value = false
         }
+    }
+
+    fun setFocus(focused: Boolean) {
+        Timber.d("GlyphManagerWrapper: setFocus($focused)")
+        _hasFocus.value = focused
     }
 
     fun init() {
@@ -95,8 +108,7 @@ class GlyphManagerWrapper @Inject constructor(
      * Each value in [pixels] is 0–255 (brightness); converted to 12-bit (0–4095) for the SDK.
      */
     fun sendFrame(pixels: IntArray) {
-        if (!_isConnected.value) {
-            Timber.v("sendFrame skipped — not connected")
+        if (!_isConnected.value || !_hasFocus.value) {
             return
         }
         runCatching {
@@ -109,7 +121,6 @@ class GlyphManagerWrapper @Inject constructor(
     }
 
     fun clear() {
-        if (!_isConnected.value) return
         runCatching { manager?.closeAppMatrix() }
             .onFailure { Timber.e(it, "clear failed") }
     }
@@ -127,6 +138,7 @@ class GlyphManagerWrapper @Inject constructor(
             manager?.unInit()
         }.onFailure { Timber.e(it, "release failed") }
         _isConnected.value = false
+        _hasFocus.value = false
         manager = null
     }
 }
